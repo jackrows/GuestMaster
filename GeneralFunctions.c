@@ -5,8 +5,8 @@
 #include "GeneralFunctions.h"
 
 /*Store a word from a file randomly
-* Return the word*/
-void TakeSecretWord(FILE* fp, char* secret_word)
+* Return the size of located(reallocated) memory*/
+int TakeSecretWord(FILE* fp, char* secret_word)
 {
 	time_t t;
 	srand((unsigned)time(&t));
@@ -44,12 +44,12 @@ void TakeSecretWord(FILE* fp, char* secret_word)
 		if(i < 3)	/*Avoid too small words, empty lines*/
 			continue;
 			
-		if((rand() % 100 ) >= 80)	/*Getting out of the loop randomly. This is used to store from file random word*/
+		if((rand() % 100 ) >= 40)	/*Getting out of the loop randomly. This is used to store from file random word*/
 			break;
 		size = SIZE_WORD;
 		/*Flushing();*/
 	}/*while*/
-	return;
+	return size;
 }
 
 /*Realloc the memory to store the word from the file*/
@@ -60,6 +60,37 @@ void ResizeMemory(char* hidden_word, FILE* fp, int size)
 	fgets(append,SIZE_WORD, fp);	/*Get from the file the rest word*/
 	strcat(hidden_word, append);	/*Append it to the rest word*/
 	/*printf("%s\n", hidden_word);*/
+}
+
+/**/
+int StartGame(FILE* fp, char* secret_word)
+{
+	/*Variables*/
+	int returned = -1;		/*Stored the return value*/
+	int tries = 0;			/*Stored the guesting attemp*/
+	int i;					/*Access arrays*/
+	int size = SIZE_WORD;	/*Store the returned size of TakeSecretWord and used it on malloc*/
+	char*	user_input;		/*Store the input word*/
+	
+	printf("\n#Picking a secret word...\n");
+	size = TakeSecretWord(fp, secret_word);		/*Take a random word from the file and store it to secret_word*/
+	
+	user_input = malloc(sizeof(char) * size);
+	if(user_input == NULL)
+		return 1;	/*Error in malloc*/	
+	
+	printf("\n- Write your inspiration\n");
+	while(tries < TRIES)	/*User attemps*/
+	{
+		printf("%d / %d attemp\n", tries+1, TRIES);
+		fgets(user_input, (int)(sizeof(secret_word) / sizeof(secret_word[0])), stdin);
+		printf("user inputs %s\n", user_input);
+		
+		tries++;
+	}
+	
+		
+	return returned;
 }
 
 /*Clean up the input buffer of stdin*/
@@ -88,7 +119,7 @@ void Explanation()
 	printf("\n====================================================================================\n");
 	printf(" Welcome to text game Guest Master. Prepare to discover your spirit rapper skills.\n");
 	printf(" You will play against computer. Your opposer will keep a single word and your\n");
-	printf(" goal is to find it. You have available %d. You have to insert a word with more\n", TRIES);
+	printf(" goal is to find it. You have available %d attemps. You have to insert a word with more\n", TRIES);
 	printf(" %d letters, if any letters contain in secret word they will displayed.", MIN_INPUT);
 	printf(" Good Luck!\n");
 	printf("====================================================================================\n");

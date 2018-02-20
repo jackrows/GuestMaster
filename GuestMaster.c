@@ -27,6 +27,7 @@ int main(int argc, char **argv)
 	FILE* fp = NULL;				/*Open the file that user specify from command line*/
 	char* hidden_word = NULL;		/*Store the word that user will try to find*/
 	int	  option = -1;				/*Store the user's option*/
+	int   ret_scanf = -1;			/*Store the return value of scanf, check invalid input from user*/
 	/*char* ret_fget;					Store the return of fgets. */
 	/*int seek = 0;					Store the seeking position to move the file to take the word*/	/*Other aproach is to use a array, store all file in it and take a random row*/
 	
@@ -44,27 +45,43 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
-	while(scanf(" %d[^/n]", &option) == 1)
+	PrintOption();
+	while( (ret_scanf = scanf(" %d", &option)) == 1)
 	{
 		Flushing();
-		switch(option) {
+		switch (option) {
 			case 1:
+				PrintEntry();
+				StartGame(fp, hidden_word);
 				break;
 			case 2:
 				Explanation();
+				PrintOption();
 				continue;
-			case 3: 
+			case 3:
 				break;
 			default:
 				printf("\n#Please input one of the available options.\n");
 				continue;
 		}
+	
+		if(option == 1 || option == 3)
+			break;
+	}
+	
+	if(ret_scanf == 0)	/*Handle for non integer input from user*/
+	{
+		printf("\n\t#You have input a non accesible character.\n");
+		printf("\t#Please next time keyboard the apropriate input.\n");
+		fclose(fp);
+		free(hidden_word);
+		return 1;
 	}
 	if(option == 3)
 	{
 		printf("\n#Exiting the game. Thank you for playing...");
 	}
-	PrintEntry();
+	
 	fseek(fp, 0, SEEK_SET);		/*Move the cursor at the start of file*/		
 	
 	TakeSecretWord(fp, hidden_word);

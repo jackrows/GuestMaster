@@ -15,11 +15,12 @@
 #define MIN_INPUT	3
 
 /*Declaration of functions*/
-void	TakeSecretWord(FILE*, char*);		/*Take the secret word from the file*/
+int		TakeSecretWord(FILE*, char*);		/*Take the secret word from the file*/
 void	Flushing();							/*Flashing the stdin buffer*/
 void	ResizeMemory(char*, FILE*, int);	/*Increase the original array if the word is too big*/
 void	PrintEntry();						/*Display the entry simple graphics*/
 void	Explanation();						/*Display a short description of the game*/
 void	PrintOption();						/*Display user's options*/
+int		StartGame(FILE*, char*);
 
 #endif	/*GeneralFunction.h*/
