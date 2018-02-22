@@ -9,46 +9,41 @@
 int TakeSecretWord(FILE* fp, char* secret_word)
 {
 	time_t t;
-	srand((unsigned)time(&t));
+	srand((unsigned)time(&t));		/*Initialize the rand function*/
+	
 	char* ret_fget;					/*Store the return of fgets. */
 	int size = SIZE_WORD;			/*Assign the global variable, used also on resizing the array*/
-	/*char* hidden_word = NULL;		Store the word that user will try to find*/
 	
 	while(!feof(fp))	/*Until the EOF*/
 	{
-		ret_fget = fgets(secret_word, SIZE_WORD, fp);	/*Keeping the return of fgets to check if reached the EOF before break occur*/
+		ret_fget = fgets(secret_word, SIZE_WORD, fp);	/*Keeping the return of fgets to check if reached the EOF before break occur(selected a word)*/
 		
 		if(ret_fget == NULL)	/*Check if EOF has reached before a random line select*/
-			fseek(fp, 0, SEEK_SET);
+			fseek(fp, 0, SEEK_SET);	/*Reset the file pointer at the begining of the file*/
 			
 		int i;
 		for(i = 0; i < size; i++)	/*Access the characters of secret word*/
 		{
 			if(i == size - 1)	/*If is the last character of the string*/
-				if(secret_word[i] != '\n')	/*Check if is equal with new line*/
+				if(secret_word[i] != '\n')	/*Check if isn't equal with new line, then realloc needed*/
 				{
-					/*printf("\n#realloc is needed\n");*/
 					size *= 2;
 					ResizeMemory(secret_word, fp, size);		/*Resize the string to fit in the word*/
 					continue;
-					/*printf("%s\n", hidden_word);*/
-					break;
 				}
 			if(secret_word[i] == '\n')	/*The word fit in the located memory*/
-			{
-				/*printf("\n");*/
 				break;
-			}
-			/*printf("%c", hidden_word[i]);*/
 		}/*for*/
+		
 		if(i <= 3)	/*Avoid too small words, empty lines*/
 			continue;
 			
-		if((rand() % 100 ) >= 80)	/*Getting out of the loop randomly. This is used to store from file random word*/
+		if((rand() % 100 ) >= 93)	/*Getting out of the loop randomly. This is used to store from file random word*/
 			break;
-		size = SIZE_WORD;
-		/*Flushing();*/
+			
+		size = SIZE_WORD;	/*Assign again the size with global size to get the next line*/
 	}/*while*/
+	
 	return size;
 }
 
@@ -59,10 +54,10 @@ void ResizeMemory(char* hidden_word, FILE* fp, int size)
 	char append[SIZE_WORD];
 	fgets(append,SIZE_WORD, fp);	/*Get from the file the rest word*/
 	strcat(hidden_word, append);	/*Append it to the rest word*/
-	/*printf("%s\n", hidden_word);*/
 }
 
-/**/
+/*Most important function for the game. Perfom the main operation
+* Return 0 if found the secret word, 1 if not founed, -1 for error occurs */
 int StartGame(FILE* fp, char* secret_word)
 {
 	/*Variables*/
@@ -76,13 +71,14 @@ int StartGame(FILE* fp, char* secret_word)
 	printf("\n#Picking a secret word... ");
 	size = TakeSecretWord(fp, secret_word);		/*Take a random word from the file and store it to secret_word*/
 	printf("Done\n");
-	int founded[size];		/*Store the position of the founded characters*/
+	
+	int founded[size];		/*Store the position of the founded characters, use the size that maybe change from TakeSecretWord()*/
 	
 	user_input = malloc(sizeof(char) * size * 2);
 	if(user_input == NULL)
-		return 1;	/*Error in malloc*/	
+		return -1;	/*Error in malloc*/	
 		
-	for(i = 0; i < size; i++)
+	for(i = 0; i < size; i++)	/*Initialize the array. -1 means that the letter doesn't founded*/
 		founded[i] = -1;
 		
 	printf("\n- Write your inspiration\n");
@@ -90,24 +86,25 @@ int StartGame(FILE* fp, char* secret_word)
 	{
 		printf("%d / %d attemp\n", tries+1, TRIES);
 		fgets(user_input, size, stdin);
-		check_user = CheckUserInput(user_input);
-		if(check_user == 1)
+		check_user = CheckUserInput(user_input);	/*Check the input of user, if is small, wrong.*/
+		if(check_user == 1)	/*Small input text*/
 		{
 			printf("\n#Please keyboard a word contains more than %d characters.\n\n", MIN_INPUT);
 			continue;
 		}
-		else if(check_user == 2)
+		else if(check_user == 2)	/*Alphabetic*/
 		{
 			printf("\n#This input format is not acceptable.\n\n");
 			continue;
 		}
-		/*printf("user inputs %s\n", user_input);*/
 		
-		/*Compare the user guestign with secret word*/
+		/*Compare the user input with secret word*/
 		CompareWords(secret_word, user_input, size, founded);
+		
 		/*Appear the existed letters*/
 		DisplayFounded(secret_word, founded);
-		returned = CheckGuesting(founded, size);
+		
+		returned = CheckGuesting(founded, size);	/*Check if the secret word founded*/
 		if(returned == 0)	/*Found it!!!*/
 		{
 			returned = 0;
@@ -115,7 +112,7 @@ int StartGame(FILE* fp, char* secret_word)
 		}
 		else				/*Missing characters*/
 			tries++;
-	}
+	}/*while*/
 	
 	/*Status of game(win, lose)*/
 	if(returned == 0)	/*Win*/
@@ -123,92 +120,83 @@ int StartGame(FILE* fp, char* secret_word)
 	else
 		returned = 1;	/*Lose*/
 	return returned;
-}
+}/*function*/
 
-/**/
+/*Perform a compare every character from user with the secret word
+* Update the founded array at StartGame()*/
 void CompareWords(const char* secret, const char* user, const int size, int bingo[])
 {
-	int i,j;
-	int finded[size];
-	for(i = 0; i < size; i++)
+	int i,j;			/*Indexings*/
+	int finded[size];	/*Temporary array for each attemp*/
+		
+	for(i = 0; i < size; i++)	/*Initialize the temp array*/
 		finded[i] = -1;
 			
 	printf("\n");
-	for(i = 0; i < size; i++)
+	for(i = 0; i < size; i++)	/*Access the user input, every character separate*/
 	{
-		if(user[i] == '\n')
-		{
+		if(user[i] == '\n')		/*If reach the end of string*/
 			break;
-		}
-		for(j = 0; j < size; j++)
+			
+		for(j = 0; j < size; j++)	/*Access the secret word*/
 		{
-			if(secret[j] == '\n')
+			if(secret[j] == '\n')	/*If reach the end of string*/
 				break;
 			
-			if(bingo[j] != -1 || finded[j] != -1)
+			if(bingo[j] != -1 || finded[j] != -1)	/*If the current character has been already founded*/
 				continue;
 			
-			if(bingo[j] == size)
+			if(bingo[j] == size)	/*If the user input is smaller from the secret word, to avoid beyond array bound access*/
 				break;
 				
-			if(user[i] == secret[j])
-			{
+			if(user[i] == secret[j])	/*The letter exist in the secret word, change the specific value from -1*/
 				finded[j] = j;
-				/*printf("%c", secret[j]);*/
-			}
-			/*else
-				printf(" ");*/
-		}
-		/*printf("\n");*/
-	}
-	for(i = 0; i < size; i++)
+		}/*Inner for*/
+	}/*Outer for*/
+	
+	for(i = 0; i < size; i++)	/*Update the founded array of StartGame()*/
 	{
 		if(bingo[i] == -1)
 			bingo[i] = finded[i];
 			
-		if(secret[i] == '\n')
+		if(secret[i] == '\n')	/*At the end of secret word*/
 		{
-			bingo[i] = size;
+			bingo[i] = size;	/*The founded characters end with the total characters size, this protect us if the secret word is smaller that the allocated memory*/
 			break;
 		}
-	/*	if(bingo[i] != -1)
-			printf("%c", secret[i]);
-		else
-			printf(" ");*/
 	}
-	/*printf("\n");*/
 	return ;
 }
 
-/**/
+/*Appear on the screen the finded characters so far*/
 void DisplayFounded(const char* secret, int founded[])
 {
-	const char* index = secret;
+	const char* index = secret;	
 	int i = 0;
 	printf("#Guesting so far :");
-	for(; *index != '\n'; index++)
+	for(; *index != '\n'; index++)	/*Access the string untill new line*/
 	{
-		if(founded[i] != -1)
+		if(founded[i] != -1)		/*The character has been founded and displayed*/
 			printf("%c", *index);
-		else
+		else						/*The character hasn't been founded and a space printed*/
 			printf(" ");
 		i++;
 	}
 	printf("\n\n");
 }
 
-/**/
+/*Check if the secret word has been found
+* Return 0 if found, 1 if not found*/
 int CheckGuesting(int bingo[], int size)
 {
 	int i;
 	int returned = 0;
 	for(i = 0; i < size; i++)
 	{
-		if(bingo[i] == size)
-		{
+		if(bingo[i] == size)	/*Reach at the end of the secret word, because size memory located is bigger that the word in the file*/
 			break;
-		}
-		if(bingo[i] == -1)
+			
+		if(bingo[i] == -1)		/*At least one character doesn't found*/
 		{
 			returned = 1;	/*Not completed founded the word*/
 			break;
@@ -217,26 +205,29 @@ int CheckGuesting(int bingo[], int size)
 	return returned;
 }
 
-/**/
+/*Check the input by the user. Not accept small word(<MIN_INPUT), or alphabet
+* Return 1 for short word, 2 for alphabet, 0 for right input*/
 int CheckUserInput(const char* user)
 {
 	int i = 0;
 	const char* index = user;
 	for(; (*index != '\n') && (*index != '\0'); index++)
-	{
-		i++;
-	}
-	if(*index == '\0')
-		Flushing();
-	if(i <= 3)
+		i++;	/*Count the characters*/
+		
+	if(*index == '\0')	/*The last character is not new line so the stdin contains extra characters from fgets*/
+		Flushing();		/*Clean up the stdin buffer*/
+		
+	if(i <= MIN_INPUT)
 		return 1;	/*Short word input by the user*/
 		
 	if(strcmp(user, "abcdefghijklmnopqrstuvwxyz") == 0 || strcmp(user, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0)
 		return 2;	/*Not accept the alphabetic*/
 	if(strncmp(user, "abcdefghijklmnopqrstuvwxyz", i) == 0 || strncmp(user, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i) == 0)
-		return 2;
-	if(strncmp(user, "zyxwvuts"))
-	return 0;
+		return 2;	/*Not accept the alphabetic*/
+	if(strncmp(user, "zyxwvutsrqponmlkjihgfedcba", i) == 0 || strncmp(user, "ZYXWVUTSRQPONMLKJIHGFEDCBA", i) == 0)
+		return 2;	/*Not accept the alphabetic reverse*/
+	
+	return 0;	/*Right format*/
 }
 
 /*Clean up the input buffer of stdin*/
