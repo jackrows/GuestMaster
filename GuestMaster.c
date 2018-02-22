@@ -45,14 +45,50 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
+	PrintEntry();
 	PrintOption();
 	while( (ret_scanf = scanf(" %d", &option)) == 1)
 	{
 		Flushing();
 		switch (option) {
-			case 1:
-				PrintEntry();
-				StartGame(fp, hidden_word);
+			case 1:;
+				int check = -1;
+				check = StartGame(fp, hidden_word);
+				if(check == 0)	/*Win*/
+				{
+					printf("\n****************************************************************************************************\n");
+					printf("\n\t\t#CONGRATULATION!!!\n");
+					printf("\t\t#You did it, you found the secret word. Good Job!\n");
+					printf("\n****************************************************************************************************\n");
+					printf("\n#If you want to play again press 'y'\n");
+					char ch;
+					scanf(" %c", &ch);
+					if(ch == 'y' || ch == 'Y')
+					{
+						PrintOption();
+						continue;
+					}	
+					else
+						break;
+				}
+				else if(check == 1)	/*Lose*/
+				{
+					printf("\n****************************************************************************************************\n");
+					printf("\n\t\t#You need practice at your spiri rapper skills.\n");
+					printf("\t\t#The secret word was: %s\n", hidden_word);
+					printf("****************************************************************************************************\n");
+					
+					printf("\n#If you want to play again press 'y'\n");
+					char ch;
+					scanf(" %c", &ch);
+					if(ch == 'y' || ch == 'Y')
+					{
+						PrintOption();
+						continue;
+					}
+					else
+						break;
+				}
 				break;
 			case 2:
 				Explanation();
@@ -77,17 +113,19 @@ int main(int argc, char **argv)
 		free(hidden_word);
 		return 1;
 	}
-	if(option == 3)
+	if(option == 1)
 	{
 		printf("\n#Exiting the game. Thank you for playing...");
 	}
+	else if(option == 3)
+		printf("\n#Leaving the game...Hope see you soon.\n");
 	
-	fseek(fp, 0, SEEK_SET);		/*Move the cursor at the start of file*/		
+	/*fseek(fp, 0, SEEK_SET);		Move the cursor at the start of file*/		
 	
-	TakeSecretWord(fp, hidden_word);
+	/*TakeSecretWord(fp, hidden_word);
 	
 	printf("secret word = %s\n", hidden_word);
-	printf("%s\n", filename);
+	printf("%s\n", filename);*/
 	
 	fclose(fp);		/*Close the file*/
 	free(hidden_word);
