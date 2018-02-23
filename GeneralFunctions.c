@@ -29,6 +29,7 @@ int TakeSecretWord(FILE* fp, char* secret_word)
 				{
 					size *= 2;
 					ResizeMemory(secret_word, fp, size);		/*Resize the string to fit in the word*/
+					i--;
 					continue;
 				}
 			if(secret_word[i] == '\n')	/*The word fit in the located memory*/
@@ -38,7 +39,7 @@ int TakeSecretWord(FILE* fp, char* secret_word)
 		if(i <= 3)	/*Avoid too small words, empty lines*/
 			continue;
 			
-		if((rand() % 100 ) >= 93)	/*Getting out of the loop randomly. This is used to store from file random word*/
+		if((rand() % 100 ) >= 98)	/*Getting out of the loop randomly. This is used to store from file random word*/
 			break;
 			
 		size = SIZE_WORD;	/*Assign again the size with global size to get the next line*/
@@ -114,6 +115,7 @@ int StartGame(FILE* fp, char* secret_word)
 			tries++;
 	}/*while*/
 	
+	free(user_input);
 	/*Status of game(win, lose)*/
 	if(returned == 0)	/*Win*/
 		return returned;
