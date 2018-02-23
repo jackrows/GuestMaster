@@ -23,8 +23,8 @@ void	Explanation();												/*Display a short description of the game*/
 void	PrintOption();												/*Display user's options*/
 int		StartGame(FILE*, char*);									/*Basic functions that perfom the game*/
 void 	CompareWords(const char*, const char*, const int, int[]);	/*Compare the secret word with the user guesting*/
-void	DisplayFounded(const char*, int []);						/*Appear on the screen the guested characters*/
-int 	CheckGuesting(int [], int);									/*Check if the secret word has been found*/
+void	DisplayFounded(const char*, const int []);					/*Appear on the screen the guested characters*/
+int 	CheckGuesting(const int [], const int);						/*Check if the secret word has been found*/
 int 	CheckUserInput(const char*);								/*Check of word that user input, to be bigger than MIN_INPUT, no whole alphabetic*/
 
 #endif	/*GeneralFunction.h*/

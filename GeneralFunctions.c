@@ -169,7 +169,7 @@ void CompareWords(const char* secret, const char* user, const int size, int bing
 }
 
 /*Appear on the screen the finded characters so far*/
-void DisplayFounded(const char* secret, int founded[])
+void DisplayFounded(const char* secret, const int founded[])
 {
 	const char* index = secret;	
 	int i = 0;
@@ -187,7 +187,7 @@ void DisplayFounded(const char* secret, int founded[])
 
 /*Check if the secret word has been found
 * Return 0 if found, 1 if not found*/
-int CheckGuesting(int bingo[], int size)
+int CheckGuesting(const int bingo[], const int size)
 {
 	int i;
 	int returned = 0;
