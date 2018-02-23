@@ -9,7 +9,7 @@ The player have to input only a word and no letter. The words aren't case sensit
 It is possible at secret word to contains numbers, space, upper letters.
 
 Operation:
-The game read words from a file and choose random one of them.
+The game read words from a file which specified at command line and choose random one of them.
 The user try to guest this word with limit attempts.
 At every word of user if there are letters that contains at hidden word, will be appeared.
 
